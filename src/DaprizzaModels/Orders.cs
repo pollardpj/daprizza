@@ -1,8 +1,15 @@
 ﻿namespace DaprizzaModels;
 
+public record OrderStatusUpdate(
+    Guid OrderId,
+    DateTime UpdatedTimestampUtc,
+    OrderStatus Status,
+    List<string>? Errors = null);
+
 public record Order(
     Guid OrderId, 
-    DateTime CreatedTimestampUtc, 
+    DateTime CreatedTimestampUtc,
+    DateTime? UpdatedTimestampUtc,
     List<Pizza> Pizzas, 
     Address Address, 
     decimal TotalPrice,

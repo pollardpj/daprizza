@@ -5,10 +5,10 @@ common:
 apps:
   - appID: daprizza-store
     appDirPath: ./DaprizzaStore/
-    appPort: 9001
+    appPort: 7001
     command: ["dotnet", "run"]
   - appID: daprizza-kitchen
     appDirPath: ./DaprizzaKitchen/
-    appPort: 9002
+    appPort: 7002
     command: ["dotnet", "run"]
     

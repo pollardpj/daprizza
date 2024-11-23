@@ -1,3 +1,6 @@
+using Dapr.Client;
+using DaprizzaModels;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,27 +9,31 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+const string daprPubSubName = "orderstatuspubsub";
 
-app.MapGet("/weatherforecast", () =>
+app.MapPost("/cook", async (Order order) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    using var client = new DaprClientBuilder().Build();
+
+    await Task.Delay(1000);
+
+    var orderStatusUpdate = new OrderStatusUpdate(
+        order.OrderId,
+        DateTime.UtcNow,
+        OrderStatus.CookingInProgress);
+
+    await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate);
+
+    await Task.Delay(1000);
+
+    orderStatusUpdate = new OrderStatusUpdate(
+        order.OrderId,
+        DateTime.UtcNow,
+        OrderStatus.ReadyForDelivery);
+
+    await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate);
+
+    return Results.Accepted();
 });
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -15,7 +15,10 @@ var app = builder.Build();
 
 const string daprStoreName = "statestore";
 
-app.MapPost("/order", async (IValidator<OrderRequest> validator, OrderRequest request) =>
+app.MapPost("/order", async (
+    IValidator<OrderRequest> validator, 
+    OrderRequest request,
+    CancellationToken token) =>
 {
     var validationResult = await validator.ValidateAsync(request);
 
@@ -24,11 +27,7 @@ app.MapPost("/order", async (IValidator<OrderRequest> validator, OrderRequest re
         return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    var order = new Order(
-        Guid.NewGuid(), 
-        DateTime.UtcNow, 
-        request.Pizzas, 
-        request.Address,
+    var order = new Order(Guid.NewGuid(), DateTime.UtcNow, null, request.Pizzas, request.Address,
         request.Pizzas.Sum(p => 10M * p.Size switch
         {
             PizzaSize.Large => 3,
@@ -38,9 +37,12 @@ app.MapPost("/order", async (IValidator<OrderRequest> validator, OrderRequest re
         }),
         OrderStatus.Created);
 
-    var client = new DaprClientBuilder().Build();
+    var stateClient = new DaprClientBuilder().Build();
+    await stateClient.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, cancellationToken: token);
 
-    await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order);
+    var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-kitchen");
+    var response = await invokeClient.PostAsJsonAsync("/cook", order, token);
+    response.EnsureSuccessStatusCode();
 
     return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
 });
