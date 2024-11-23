@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dapr.Actors;
 using Dapr.Actors.Client;
 using Dapr.Client;
@@ -15,12 +16,7 @@ builder.Services.AddActors(options =>
 {
     // Register actor types and configure actor settings
     options.Actors.RegisterActor<KitchenManagerActor>();
-
-    options.ReentrancyConfig = new ActorReentrancyConfig
-    {
-        Enabled = true,
-        MaxStackDepth = 32
-    };
+    options.Actors.RegisterActor<ChefActor>();
 });
 
 // Add services to the container.
@@ -32,7 +28,7 @@ var app = builder.Build();
 const string daprPubSubName = "orderstatuspubsub";
 const string kitchenManagerActorId = "kitchen-manager";
 
-app.MapPost("/cook", async (Order order, CancellationToken token) =>
+app.MapPost("/cook", async (ILogger<Program> logger, Order order, CancellationToken token) =>
 {
     using var client = new DaprClientBuilder().Build();
 
@@ -54,10 +50,13 @@ app.MapPost("/cook", async (Order order, CancellationToken token) =>
 
     await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
 
+    logger.LogInformation("New Order accepted: {Order}", JsonSerializer.Serialize(order));
+
     return Results.Accepted();
 });
 
-app.MapMethods("/Chefs/register", ["POST", "PUT"], async (
+app.MapMethods("/chefs/register", ["POST", "PUT"], async (
+    ILogger<Program> logger,
     IValidator<RegisterChefsRequest> validator, 
     RegisterChefsRequest request) =>
 {
@@ -72,6 +71,8 @@ app.MapMethods("/Chefs/register", ["POST", "PUT"], async (
     var proxy = ActorProxy.Create<IKitchenManagerActor>(actorId, nameof(KitchenManagerActor));
 
     await proxy.RegisterChefs(request.Chefs);
+
+    logger.LogInformation("Chefs Registered: {Chefs}", JsonSerializer.Serialize(request.Chefs));
 
     return Results.Ok();
 });

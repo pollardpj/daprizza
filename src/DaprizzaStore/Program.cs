@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
@@ -41,7 +42,7 @@ app.MapPost("/order", async (
             PizzaSize.Large => 3,
             PizzaSize.Medium => 2,
             PizzaSize.Small => 1,
-            _ => 10
+            _ => throw new InvalidOperationException($"Pizza with size = {p.Size} doesn't have a price")
         }),
         OrderStatus.Created);
 
@@ -66,9 +67,10 @@ app.MapGet("/order/{orderId:guid}", async (Guid orderId, CancellationToken token
 });
 
 // Dapr subscription in [Topic] routes orders topic to this route
-app.MapPost("/orderstatus", 
-    [Topic(daprPubSubName, "orderstatus")] 
-    async (OrderStatusUpdate orderStatusUpdate, CancellationToken token) => {
+app.MapPost("/orderstatus", [Topic(daprPubSubName, "orderstatus")] async (
+        ILogger<Program> logger,
+        OrderStatusUpdate orderStatusUpdate, 
+        CancellationToken token) => {
 
     var client = new DaprClientBuilder().Build();
 
@@ -79,6 +81,8 @@ app.MapPost("/orderstatus",
 
     await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, 
         cancellationToken: token);
+
+    logger.LogInformation("Order Updated: {OrderUpdated}", JsonSerializer.Serialize(orderStatusUpdate));
 });
 
 app.Run();
