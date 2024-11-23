@@ -1,0 +1,10 @@
+
+version: 1
+common:
+  resourcesPath: ../resources/
+apps:
+  - appID: daprizza-store
+    appDirPath: ./DaprizzaStore/
+    appPort: 9001
+    command: ["dotnet", "run"]
+    
