@@ -1,3 +1,4 @@
+using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
 using DaprizzaStore.Validators;
@@ -11,9 +12,16 @@ builder.Services.AddScoped<IValidator<OrderRequest>, OrderRequestValidator>();
 
 var app = builder.Build();
 
+// Dapr will send serialized event object vs. being raw CloudEvent
+app.UseCloudEvents();
+
+// needed for Dapr pub/sub routing
+app.MapSubscribeHandler();
+
 // Configure the HTTP request pipeline.
 
 const string daprStoreName = "statestore";
+const string daprPubSubName = "orderstatuspubsub";
 
 app.MapPost("/order", async (
     IValidator<OrderRequest> validator, 
@@ -41,9 +49,8 @@ app.MapPost("/order", async (
     await stateClient.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, cancellationToken: token);
 
     var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-kitchen");
-    var response = await invokeClient.PostAsJsonAsync("/cook", order, token);
-    response.EnsureSuccessStatusCode();
-
+    await invokeClient.PostAsJsonAsync("/cook", order, token);
+    
     return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
 });
 
@@ -54,6 +61,20 @@ app.MapGet("/order/{orderId:guid}", async (Guid orderId) =>
     var order = await client.GetStateAsync<Order>(daprStoreName, orderId.ToString());
 
     return order == null ? Results.NotFound() : Results.Ok(order);
+});
+
+// Dapr subscription in [Topic] routes orders topic to this route
+app.MapPost("/orderstatus", 
+    [Topic(daprPubSubName, "orderstatus")] 
+    async (OrderStatusUpdate orderStatusUpdate, CancellationToken token) => {
+
+    var client = new DaprClientBuilder().Build();
+
+    var order = await client.GetStateAsync<Order>(daprStoreName, orderStatusUpdate.OrderId.ToString());
+
+    order.UpdateStatus(orderStatusUpdate);
+
+    await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, cancellationToken: token);
 });
 
 app.Run();

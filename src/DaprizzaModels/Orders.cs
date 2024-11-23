@@ -7,15 +7,27 @@ public record OrderStatusUpdate(
     List<string>? Errors = null);
 
 public record Order(
-    Guid OrderId, 
+    Guid OrderId,
     DateTime CreatedTimestampUtc,
     DateTime? UpdatedTimestampUtc,
-    List<Pizza> Pizzas, 
-    Address Address, 
+    List<Pizza> Pizzas,
+    Address Address,
     decimal TotalPrice,
     OrderStatus Status,
     List<string>? Errors = null)
-    : OrderRequest(Pizzas, Address);
+    : OrderRequest(Pizzas, Address)
+{
+    public OrderStatus Status { get; private set; }
+    public DateTime? UpdatedTimestampUtc { get; private set; }
+    public List<string>? Errors { get; private set; }
+
+    public void UpdateStatus(OrderStatusUpdate orderStatusUpdate)
+    {
+        Status = orderStatusUpdate.Status;
+        Errors = orderStatusUpdate.Errors;
+        UpdatedTimestampUtc = orderStatusUpdate.UpdatedTimestampUtc;
+    }
+}
 
 public record OrderResponse(
     Guid OrderId, 
