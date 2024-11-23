@@ -35,7 +35,8 @@ app.MapPost("/order", async (IValidator<OrderRequest> validator, OrderRequest re
             PizzaSize.Medium => 2,
             PizzaSize.Small => 1,
             _ => 10
-        }));
+        }),
+        OrderStatus.Created);
 
     var client = new DaprClientBuilder().Build();
 
