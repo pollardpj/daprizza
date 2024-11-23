@@ -3,6 +3,7 @@ using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
+using DaprizzaStore.Framework;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,13 +43,7 @@ app.MapPost("/order", async (
         CreatedTimestampUtc = DateTime.UtcNow,
         Pizzas = request.Pizzas,
         Address = request.Address,
-        TotalPrice = request.Pizzas.Sum(p => 5M * p.Toppings.Count() * p.Size switch
-        {
-            PizzaSize.Large => 3,
-            PizzaSize.Medium => 2,
-            PizzaSize.Small => 1,
-            _ => throw new InvalidOperationException($"Pizza with size = {p.Size} doesn't have a price")
-        }),
+        TotalPrice = request.Pizzas.GetTotalPrice(),
         Status = OrderStatus.Created
     };
 
