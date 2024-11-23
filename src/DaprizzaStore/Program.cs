@@ -42,7 +42,7 @@ app.MapPost("/order", async (
         null, 
         request.Pizzas, 
         request.Address,
-        request.Pizzas.Sum(p => 10M * p.Size switch
+        request.Pizzas.Sum(p => 5M * p.Toppings.Count() * p.Size switch
         {
             PizzaSize.Large => 3,
             PizzaSize.Medium => 2,
