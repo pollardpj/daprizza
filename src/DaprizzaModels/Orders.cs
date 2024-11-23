@@ -4,22 +4,22 @@ public record OrderStatusUpdate(
     Guid OrderId,
     DateTime UpdatedTimestampUtc,
     OrderStatus Status,
-    List<string>? Errors = null);
+    IEnumerable<string>? Errors = null);
 
 public record Order(
     Guid OrderId,
     DateTime CreatedTimestampUtc,
     DateTime? UpdatedTimestampUtc,
-    List<Pizza> Pizzas,
+    IEnumerable<Pizza> Pizzas,
     Address Address,
     decimal TotalPrice,
     OrderStatus Status,
-    List<string>? Errors = null)
+    IEnumerable<string>? Errors = null)
     : OrderRequest(Pizzas, Address)
 {
-    public OrderStatus Status { get; private set; }
-    public DateTime? UpdatedTimestampUtc { get; private set; }
-    public List<string>? Errors { get; private set; }
+    public OrderStatus Status { get; private set; } = Status;
+    public DateTime? UpdatedTimestampUtc { get; private set; } = UpdatedTimestampUtc;
+    public IEnumerable<string>? Errors { get; private set; } = Errors;
 
     public void UpdateStatus(OrderStatusUpdate orderStatusUpdate)
     {
@@ -34,7 +34,7 @@ public record OrderResponse(
     decimal TotalPrice);
 
 public record OrderRequest(
-    List<Pizza> Pizzas, 
+    IEnumerable<Pizza> Pizzas, 
     Address Address);
 
 public record Address(

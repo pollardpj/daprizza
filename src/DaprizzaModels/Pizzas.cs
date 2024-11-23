@@ -1,8 +1,6 @@
 ﻿namespace DaprizzaModels;
 
-public record Pizza(PizzaSize Size, List<string> Toppings)
-{
-}
+public record Pizza(PizzaSize Size, IEnumerable<string> Toppings);
 
 public enum PizzaSize
 {

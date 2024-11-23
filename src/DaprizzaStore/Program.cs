@@ -46,7 +46,8 @@ app.MapPost("/order", async (
         OrderStatus.Created);
 
     var stateClient = new DaprClientBuilder().Build();
-    await stateClient.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, cancellationToken: token);
+    await stateClient.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, 
+        cancellationToken: token);
 
     var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-kitchen");
     await invokeClient.PostAsJsonAsync("/cook", order, token);
@@ -54,11 +55,12 @@ app.MapPost("/order", async (
     return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
 });
 
-app.MapGet("/order/{orderId:guid}", async (Guid orderId) =>
+app.MapGet("/order/{orderId:guid}", async (Guid orderId, CancellationToken token) =>
 {
     var client = new DaprClientBuilder().Build();
 
-    var order = await client.GetStateAsync<Order>(daprStoreName, orderId.ToString());
+    var order = await client.GetStateAsync<Order>(daprStoreName, orderId.ToString(), 
+        cancellationToken: token);
 
     return order == null ? Results.NotFound() : Results.Ok(order);
 });
@@ -70,11 +72,13 @@ app.MapPost("/orderstatus",
 
     var client = new DaprClientBuilder().Build();
 
-    var order = await client.GetStateAsync<Order>(daprStoreName, orderStatusUpdate.OrderId.ToString());
+    var order = await client.GetStateAsync<Order>(daprStoreName, orderStatusUpdate.OrderId.ToString(),
+        cancellationToken: token);
 
     order.UpdateStatus(orderStatusUpdate);
 
-    await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, cancellationToken: token);
+    await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, 
+        cancellationToken: token);
 });
 
 app.Run();
