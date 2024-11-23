@@ -8,6 +8,6 @@ public interface IKitchenManagerActor : IActor
     Task RegisterChefs(IEnumerable<Chef> chefs);
     Task<IEnumerable<Chef>> ListChefs();
     Task EnqueueOrder(Order order);
-    Task<Order?> DequeueOrder();
+    Task<Order> DequeueOrder();
 }
 

@@ -9,7 +9,7 @@ public class RegisterChefsRequestValidator : AbstractValidator<RegisterChefsRequ
         RuleFor(x => x.Chefs)
             .NotEmpty();
         RuleFor(x => x.Chefs)
-            .Must(chefs => chefs.All(chef => !string.IsNullOrWhiteSpace(chef.Name) && chef.Name.Length <= 255))
+            .Must(chefs => chefs.All(c => !string.IsNullOrWhiteSpace(c.Name) && c.Name.Length <= 255))
             .WithMessage("Invalid Chef found.")
             .Must(chefs =>
                 chefs.Select(c => c.Name).Distinct(StringComparer.OrdinalIgnoreCase).Count() == chefs.Count())

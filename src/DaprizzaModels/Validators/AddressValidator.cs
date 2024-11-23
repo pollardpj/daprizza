@@ -6,10 +6,10 @@ public class AddressValidator : AbstractValidator<Address>
 {
     public AddressValidator()
     {
-        RuleFor(x => x.Postcode)
+        RuleFor(a => a.Postcode)
             .NotEmpty()
             .MaximumLength(255);
-        RuleFor(x => x.HouseNumberOrName)
+        RuleFor(a => a.HouseNumberOrName)
             .NotEmpty()
             .MaximumLength(255);
     }

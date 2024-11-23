@@ -6,13 +6,13 @@ public class OrderRequestValidator : AbstractValidator<OrderRequest>
 {
     public OrderRequestValidator()
     {
-        RuleFor(x => x.Pizzas)
+        RuleFor(r => r.Pizzas)
             .NotEmpty();
-        RuleForEach(x => x.Pizzas)
+        RuleForEach(r => r.Pizzas)
             .SetValidator(new PizzaValidator());
-        RuleFor(x => x.Address)
+        RuleFor(r => r.Address)
             .NotNull();
-        RuleFor(x => x.Address)
+        RuleFor(r => r.Address)
             .SetValidator(new AddressValidator());
     }
 }
