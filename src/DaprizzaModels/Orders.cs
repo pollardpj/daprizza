@@ -46,10 +46,9 @@ public class Address
 public enum OrderStatus
 {
     Created = 10,
-    PassedToKitchen = 20,
-    CookingInProgress = 30,
-    ReadyForDelivery = 40,
-    InTransit = 50,
-    Delivered = 60,
+    CookingInProgress = 20,
+    ReadyForDelivery = 30,
+    InTransit = 40,
+    Delivered = 50,
     InError = 999
 }
