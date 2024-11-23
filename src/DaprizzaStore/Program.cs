@@ -26,7 +26,12 @@ app.MapPost("/order", async (IValidator<OrderRequest> validator, OrderRequest re
         DateTime.UtcNow, 
         request.Pizzas, 
         request.Address,
-        request.Pizzas.Count * 9.99M);
+        request.Pizzas.Sum(p => 10M * p.Size switch
+        {
+            PizzaSize.Large => 3,
+            PizzaSize.Medium => 2,
+            _ => 1
+        }));
 
     return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
 });

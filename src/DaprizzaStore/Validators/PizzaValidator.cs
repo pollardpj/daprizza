@@ -8,7 +8,8 @@ namespace DaprizzaStore.Validators
         public PizzaValidator()
         {
             RuleFor(x => x.Size)
-                .NotEmpty();
+                .NotEmpty()
+                .IsInEnum();
             RuleFor(x => x.Toppings)
                 .NotEmpty();
             RuleFor(x => x.Toppings)
