@@ -15,6 +15,12 @@ public class KitchenManagerActor(
     {
         await StateManager.SetStateAsync(chefsKey, chefs);
 
+        // Get all the chefs working:
+        foreach (var chef in chefs)
+        {
+            
+        }
+
         await this.RegisterReminderAsync("CheckOnKitchen", null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
     }
 
@@ -51,6 +57,7 @@ public class KitchenManagerActor(
 
     public Task ReceiveReminderAsync(string reminderName, byte[] state, TimeSpan dueTime, TimeSpan period)
     {
+        logger.LogInformation("Checking what the chefs are up to...");
         return Task.CompletedTask;
     }
 }

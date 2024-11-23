@@ -2,7 +2,7 @@ using System.Text.Json;
 using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
-using DaprizzaStore.Validators;
+using DaprizzaModels.Validators;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,7 +36,12 @@ app.MapPost("/order", async (
         return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    var order = new Order(Guid.NewGuid(), DateTime.UtcNow, null, request.Pizzas, request.Address,
+    var order = new Order(
+        Guid.NewGuid(), 
+        DateTime.UtcNow, 
+        null, 
+        request.Pizzas, 
+        request.Address,
         request.Pizzas.Sum(p => 10M * p.Size switch
         {
             PizzaSize.Large => 3,
@@ -56,7 +61,9 @@ app.MapPost("/order", async (
     return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
 });
 
-app.MapGet("/order/{orderId:guid}", async (Guid orderId, CancellationToken token) =>
+app.MapGet("/order/{orderId:guid}", async (
+    Guid orderId, 
+    CancellationToken token) =>
 {
     var client = new DaprClientBuilder().Build();
 
@@ -68,9 +75,10 @@ app.MapGet("/order/{orderId:guid}", async (Guid orderId, CancellationToken token
 
 // Dapr subscription in [Topic] routes orders topic to this route
 app.MapPost("/orderstatus", [Topic(daprPubSubName, "orderstatus")] async (
-        ILogger<Program> logger,
-        OrderStatusUpdate orderStatusUpdate, 
-        CancellationToken token) => {
+    ILogger<Program> logger,
+    OrderStatusUpdate orderStatusUpdate, 
+    CancellationToken token) => 
+{
 
     var client = new DaprClientBuilder().Build();
 

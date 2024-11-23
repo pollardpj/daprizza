@@ -23,12 +23,18 @@ builder.Services.AddActors(options =>
 
 var app = builder.Build();
 
+// Dapr will send serialized event object vs. being raw CloudEvent
+app.UseCloudEvents();
+
 // Configure the HTTP request pipeline.
 
 const string daprPubSubName = "orderstatuspubsub";
 const string kitchenManagerActorId = "kitchen-manager";
 
-app.MapPost("/cook", async (ILogger<Program> logger, Order order, CancellationToken token) =>
+app.MapPost("/cook", async (
+    ILogger<Program> logger, 
+    Order order, 
+    CancellationToken token) =>
 {
     using var client = new DaprClientBuilder().Build();
 
