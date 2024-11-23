@@ -7,7 +7,7 @@ public record OrderStatusUpdate(
     IEnumerable<string>? Errors = null);
 
 public record Order(
-    Guid OrderId,
+    Guid Id,
     DateTime CreatedTimestampUtc,
     DateTime? UpdatedTimestampUtc,
     IEnumerable<Pizza> Pizzas,

@@ -3,6 +3,7 @@ using Dapr.Actors;
 using Dapr.Actors.Client;
 using Dapr.Client;
 using DaprizzaInterfaces;
+using DaprizzaKitchen;
 using DaprizzaKitchen.Actors;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
@@ -29,7 +30,6 @@ app.UseCloudEvents();
 // Configure the HTTP request pipeline.
 
 const string daprPubSubName = "orderstatuspubsub";
-const string kitchenManagerActorId = "kitchen-manager";
 
 app.MapPost("/cook", async (
     ILogger<Program> logger, 
@@ -41,7 +41,7 @@ app.MapPost("/cook", async (
     await Task.Delay(1000);
 
     var orderStatusUpdate = new OrderStatusUpdate(
-        order.OrderId,
+        order.Id,
         DateTime.UtcNow,
         OrderStatus.CookingInProgress);
 
@@ -50,13 +50,13 @@ app.MapPost("/cook", async (
     await Task.Delay(1000);
 
     orderStatusUpdate = new OrderStatusUpdate(
-        order.OrderId,
+        order.Id,
         DateTime.UtcNow,
         OrderStatus.ReadyForDelivery);
 
     await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
 
-    logger.LogInformation("New Order accepted: {Order}", JsonSerializer.Serialize(order));
+    logger.LogInformation("New Order accepted into the kitchen: {Order}", JsonSerializer.Serialize(order));
 
     return Results.Accepted();
 });
@@ -73,7 +73,7 @@ app.MapMethods("/chefs/register", ["POST", "PUT"], async (
         return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    var actorId = new ActorId(kitchenManagerActorId);
+    var actorId = new ActorId(Constants.kitchenManagerActorId);
     var proxy = ActorProxy.Create<IKitchenManagerActor>(actorId, nameof(KitchenManagerActor));
 
     await proxy.RegisterChefs(request.Chefs);

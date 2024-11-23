@@ -52,13 +52,13 @@ app.MapPost("/order", async (
         OrderStatus.Created);
 
     var stateClient = new DaprClientBuilder().Build();
-    await stateClient.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, 
+    await stateClient.SaveStateAsync(daprStoreName, order.Id.ToString(), order, 
         cancellationToken: token);
 
     var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-kitchen");
     await invokeClient.PostAsJsonAsync("/cook", order, token);
     
-    return Results.Ok(new OrderResponse(order.OrderId, order.TotalPrice));
+    return Results.Ok(new OrderResponse(order.Id, order.TotalPrice));
 });
 
 app.MapGet("/order/{orderId:guid}", async (
@@ -87,7 +87,7 @@ app.MapPost("/orderstatus", [Topic(daprPubSubName, "orderstatus")] async (
 
     order.UpdateStatus(orderStatusUpdate);
 
-    await client.SaveStateAsync(daprStoreName, order.OrderId.ToString(), order, 
+    await client.SaveStateAsync(daprStoreName, order.Id.ToString(), order, 
         cancellationToken: token);
 
     logger.LogInformation("Order Updated: {OrderUpdated}", JsonSerializer.Serialize(orderStatusUpdate));
