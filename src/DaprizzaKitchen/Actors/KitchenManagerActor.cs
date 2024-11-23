@@ -33,12 +33,17 @@ public class KitchenManagerActor(
 
     public async Task<IEnumerable<Chef>> ListChefs()
     {
-        return await StateManager.GetStateAsync<IEnumerable<Chef>>(chefsKey);
+        var chefs = await StateManager.TryGetStateAsync<IEnumerable<Chef>>(chefsKey);
+
+        return chefs.HasValue ? chefs.Value : new List<Chef>();
     }
 
     public async Task EnqueueOrder(Order order)
     {
-        var orders = await StateManager.GetStateAsync<List<Order>>(ordersInProgress);
+        var ordersTest = await StateManager.TryGetStateAsync<List<Order>>(ordersInProgress);
+
+        var orders = ordersTest.HasValue ? [] : ordersTest.Value;
+
         orders.Add(order);
 
         await StateManager.SetStateAsync(ordersInProgress, orders);
@@ -46,13 +51,14 @@ public class KitchenManagerActor(
         logger.LogInformation("Order received: {Order}", order);
     }
 
-    public async Task<Order?> DequeueOrder()
+    public async Task<Order> DequeueOrder()
     {
-        var orders = await StateManager.GetStateAsync<List<Order>>(ordersInProgress);
-        Order? dequeuedOrder = default;
+        var ordersTest = await StateManager.TryGetStateAsync<List<Order>>(ordersInProgress);
+        Order dequeuedOrder = default;
 
-        if (orders?.Any() == true)
+        if (ordersTest.HasValue && ordersTest.Value.Any())
         {
+            var orders = ordersTest.Value;
             dequeuedOrder = orders[0];
             orders.RemoveAt(0);
             await StateManager.SetStateAsync(ordersInProgress, orders);

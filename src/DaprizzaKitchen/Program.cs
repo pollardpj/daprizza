@@ -40,19 +40,23 @@ app.MapPost("/cook", async (
 
     await Task.Delay(1000);
 
-    var orderStatusUpdate = new OrderStatusUpdate(
-        order.Id,
-        DateTime.UtcNow,
-        OrderStatus.CookingInProgress);
+    var orderStatusUpdate = new OrderStatusUpdate
+    {
+        OrderId = order.Id,
+        Status = OrderStatus.CookingInProgress,
+        UpdatedTimestampUtc = DateTime.UtcNow
+    };
 
     await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
 
     await Task.Delay(1000);
 
-    orderStatusUpdate = new OrderStatusUpdate(
-        order.Id,
-        DateTime.UtcNow,
-        OrderStatus.ReadyForDelivery);
+    orderStatusUpdate = new OrderStatusUpdate
+    {
+        OrderId = order.Id,
+        Status = OrderStatus.ReadyForDelivery,
+        UpdatedTimestampUtc = DateTime.UtcNow
+    };
 
     await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
 

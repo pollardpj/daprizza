@@ -1,8 +1,11 @@
 ﻿namespace DaprizzaModels;
 
-public record Chef
+public class Chef
 {
-    public string? Name { get; init; }
+    public string Name { get; init; }
 }
 
-public record RegisterChefsRequest(IEnumerable<Chef> Chefs);
+public class RegisterChefsRequest
+{
+    public IEnumerable<Chef> Chefs { get; init; }
+}

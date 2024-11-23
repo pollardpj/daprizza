@@ -1,25 +1,21 @@
 ﻿namespace DaprizzaModels;
 
-public record OrderStatusUpdate(
-    Guid OrderId,
-    DateTime UpdatedTimestampUtc,
-    OrderStatus Status,
-    IEnumerable<string>? Errors = null);
-
-public record Order(
-    Guid Id,
-    DateTime CreatedTimestampUtc,
-    DateTime? UpdatedTimestampUtc,
-    IEnumerable<Pizza> Pizzas,
-    Address Address,
-    decimal TotalPrice,
-    OrderStatus Status,
-    IEnumerable<string>? Errors = null)
-    : OrderRequest(Pizzas, Address)
+public class OrderStatusUpdate
 {
-    public OrderStatus Status { get; private set; } = Status;
-    public DateTime? UpdatedTimestampUtc { get; private set; } = UpdatedTimestampUtc;
-    public IEnumerable<string>? Errors { get; private set; } = Errors;
+    public Guid OrderId { get; set; }
+    public DateTime UpdatedTimestampUtc { get; set; }
+    public OrderStatus Status { get; set; }
+    public IEnumerable<string> Errors { get; set; }
+}
+
+public class Order : OrderRequest
+{
+    public Guid Id { get; set; }
+    public DateTime CreatedTimestampUtc { get; set; }
+    public DateTime? UpdatedTimestampUtc { get; set; }
+    public decimal TotalPrice { get; set; }
+    public OrderStatus Status { get; set; }
+    public IEnumerable<string> Errors { get; set; }
 
     public void UpdateStatus(OrderStatusUpdate orderStatusUpdate)
     {
@@ -29,17 +25,23 @@ public record Order(
     }
 }
 
-public record OrderResponse(
-    Guid OrderId, 
-    decimal TotalPrice);
+public class OrderResponse
+{
+    public Guid OrderId { get; set; }
+    public decimal TotalPrice { get; set; }
+}
 
-public record OrderRequest(
-    IEnumerable<Pizza> Pizzas, 
-    Address Address);
+public class OrderRequest
+{
+    public IEnumerable<Pizza> Pizzas { get; set; }
+    public Address Address {get; set; }
+}
 
-public record Address(
-    string HouseNumberOrName, 
-    string Postcode);
+public class Address
+{
+    public string HouseNumberOrName { get; set; }
+    public string Postcode { get; set; }
+}
 
 public enum OrderStatus
 {
