@@ -25,7 +25,7 @@ app.MapSubscribeHandler();
 const string daprStoreName = "statestore";
 const string daprPubSubName = "orderstatuspubsub";
 
-app.MapPost("/order", async (
+app.MapPost("/api/order", async (
     IValidator<OrderRequest> validator, 
     OrderRequest request,
     CancellationToken token) =>
@@ -61,7 +61,7 @@ app.MapPost("/order", async (
     });
 });
 
-app.MapGet("/order/{orderId:guid}", async (
+app.MapGet("/api/order/{orderId:guid}", async (
     Guid orderId, 
     CancellationToken token) =>
 {

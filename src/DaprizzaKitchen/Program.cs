@@ -1,13 +1,12 @@
-using System.Text.Json;
 using Dapr.Actors;
 using Dapr.Actors.Client;
-using Dapr.Client;
 using DaprizzaInterfaces;
 using DaprizzaKitchen;
 using DaprizzaKitchen.Actors;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
 using FluentValidation;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,43 +28,22 @@ app.UseCloudEvents();
 
 // Configure the HTTP request pipeline.
 
-const string daprPubSubName = "orderstatuspubsub";
-
 app.MapPost("/cook", async (
     ILogger<Program> logger, 
     Order order, 
     CancellationToken token) =>
 {
-    using var client = new DaprClientBuilder().Build();
+    var actorId = new ActorId(Constants.KitchenManagerActorId);
+    var proxy = ActorProxy.Create<IKitchenManagerActor>(actorId, nameof(KitchenManagerActor));
 
-    await Task.Delay(1000);
-
-    var orderStatusUpdate = new OrderStatusUpdate
-    {
-        OrderId = order.Id,
-        Status = OrderStatus.CookingInProgress,
-        UpdatedTimestampUtc = DateTime.UtcNow
-    };
-
-    await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
-
-    await Task.Delay(1000);
-
-    orderStatusUpdate = new OrderStatusUpdate
-    {
-        OrderId = order.Id,
-        Status = OrderStatus.ReadyForDelivery,
-        UpdatedTimestampUtc = DateTime.UtcNow
-    };
-
-    await client.PublishEventAsync(daprPubSubName, "orderstatus", orderStatusUpdate, token);
+    await proxy.EnqueueOrder(order);
 
     logger.LogInformation("New Order accepted into the kitchen: {Order}", JsonSerializer.Serialize(order));
 
     return Results.Accepted();
 });
 
-app.MapMethods("/chefs/register", ["POST", "PUT"], async (
+app.MapMethods("/api/chefs/register", ["POST", "PUT"], async (
     ILogger<Program> logger,
     IValidator<RegisterChefsRequest> validator, 
     RegisterChefsRequest request) =>
@@ -77,12 +55,12 @@ app.MapMethods("/chefs/register", ["POST", "PUT"], async (
         return Results.ValidationProblem(validationResult.ToDictionary());
     }
 
-    var actorId = new ActorId(Constants.kitchenManagerActorId);
+    var actorId = new ActorId(Constants.KitchenManagerActorId);
     var proxy = ActorProxy.Create<IKitchenManagerActor>(actorId, nameof(KitchenManagerActor));
 
     await proxy.RegisterChefs(request.Chefs);
 
-    logger.LogInformation("Chefs Registered: {Chefs}", JsonSerializer.Serialize(request.Chefs));
+    logger.LogInformation("Chefs registered and started work: {Chefs}", JsonSerializer.Serialize(request.Chefs));
 
     return Results.Ok();
 });

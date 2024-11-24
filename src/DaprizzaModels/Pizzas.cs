@@ -2,8 +2,8 @@
 
 public class Pizza
 {
-    public PizzaSize Size { get; set; }
-    public IEnumerable<string> Toppings { get; set; }
+    public PizzaSize Size { get; init; }
+    public IEnumerable<string> Toppings { get; init; }
 }
 
 public enum PizzaSize

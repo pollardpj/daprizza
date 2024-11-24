@@ -4,37 +4,37 @@ using Dapr.Actors.Runtime;
 using DaprizzaInterfaces;
 using DaprizzaModels;
 
-namespace DaprizzaKitchen.Actors;
+namespace DaprizzaDelivery.Actors;
 
-public class KitchenManagerActor(
+public class DeliveryManagerActor(
     ActorHost host,
-    ILogger<KitchenManagerActor> logger) : Actor(host), IKitchenManagerActor, IRemindable
+    ILogger<DeliveryManagerActor> logger) : Actor(host), IDeliveryManagerActor, IRemindable
 {
-    private const string chefsKey = "chefs";
+    private const string driversKey = "drivers";
     private const string ordersInQueue = "ordersInQueue";
-    private const string chefActorIdPrefix = "chef";
+    private const string driverActorIdPrefix = "driver";
 
-    public async Task RegisterChefs(IEnumerable<Chef> chefs)
+    public async Task RegisterDrivers(IEnumerable<Driver> drivers)
     {
-        await StateManager.SetStateAsync(chefsKey, chefs);
+        await StateManager.SetStateAsync(driversKey, drivers);
 
-        // Get all the chefs working:
-        foreach (var chef in chefs)
+        // Get all the drivers working:
+        foreach (var driver in drivers)
         {
-            var actorId = new ActorId($"{chefActorIdPrefix}-{chef.Name!.ToLowerInvariant()}");
-            var proxy = ActorProxy.Create<IChefActor>(actorId, nameof(ChefActor));
+            var actorId = new ActorId($"{driverActorIdPrefix}-{driver.Name!.ToLowerInvariant()}");
+            var proxy = ActorProxy.Create<IDriverActor>(actorId, nameof(DriverActor));
 
-            await proxy.StartCooking();
+            await proxy.StartDelivering();
         }
 
-        await this.RegisterReminderAsync("CheckOnKitchen", null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
+        await this.RegisterReminderAsync("CheckOnDrivers", null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));
     }
 
-    public async Task<IEnumerable<Chef>> ListChefs()
+    public async Task<IEnumerable<Driver>> ListDrivers()
     {
-        var chefs = await StateManager.TryGetStateAsync<IEnumerable<Chef>>(chefsKey);
+        var drivers = await StateManager.TryGetStateAsync<IEnumerable<Driver>>(driversKey);
 
-        return chefs.HasValue ? chefs.Value : new List<Chef>();
+        return drivers.HasValue ? drivers.Value : new List<Driver>();
     }
 
     public async Task EnqueueOrder(Order order)
@@ -69,12 +69,12 @@ public class KitchenManagerActor(
 
     public Task ReceiveReminderAsync(string reminderName, byte[] state, TimeSpan dueTime, TimeSpan period)
     {
-        if (reminderName != "CheckOnKitchen")
+        if (reminderName != "CheckOnDrivers")
         {
             return Task.CompletedTask;
         }
 
-        logger.LogInformation("TODO: Check what the chefs are up to...");
+        logger.LogInformation("TODO: Check what the drivers are up to...");
 
         return Task.CompletedTask;
     }

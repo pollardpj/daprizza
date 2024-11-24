@@ -11,4 +11,8 @@ apps:
     appDirPath: ./DaprizzaKitchen/
     appPort: 7002
     command: ["dotnet", "run"]
+  - appID: daprizza-delivery
+    appDirPath: ./DaprizzaDelivery/
+    appPort: 7003
+    command: ["dotnet", "run"]
     
