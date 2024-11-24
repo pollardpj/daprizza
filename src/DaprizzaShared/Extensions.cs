@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace DaprizzaDelivery;
+namespace DaprizzaShared;
 
 public static class Extensions
 {

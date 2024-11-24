@@ -1,4 +1,6 @@
-﻿namespace DaprizzaModels;
+﻿using DaprizzaShared;
+
+namespace DaprizzaModels;
 
 public class OrderStatusUpdate
 {
@@ -44,12 +46,3 @@ public class Address
     public string Postcode { get; init; }
 }
 
-public enum OrderStatus
-{
-    Created = 10,
-    CookingInProgress = 20,
-    ReadyForDelivery = 30,
-    InTransit = 40,
-    Delivered = 50,
-    InError = 999
-}

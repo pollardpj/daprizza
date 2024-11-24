@@ -4,6 +4,7 @@ using Dapr.Actors.Runtime;
 using Dapr.Client;
 using DaprizzaInterfaces;
 using DaprizzaModels;
+using DaprizzaShared;
 
 namespace DaprizzaDelivery.Actors;
 

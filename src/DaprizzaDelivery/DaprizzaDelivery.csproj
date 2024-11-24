@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DaprizzaInterfaces\DaprizzaInterfaces.csproj" />
     <ProjectReference Include="..\DaprizzaModels\DaprizzaModels.csproj" />
+    <ProjectReference Include="..\DaprizzaShared\DaprizzaShared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

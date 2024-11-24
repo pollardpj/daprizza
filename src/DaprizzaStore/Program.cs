@@ -2,6 +2,7 @@ using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
+using DaprizzaShared;
 using DaprizzaStore;
 using FluentValidation;
 

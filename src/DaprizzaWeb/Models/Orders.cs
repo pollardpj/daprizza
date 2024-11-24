@@ -2,8 +2,7 @@
 
 public class Order
 {
-    public string SomeValue { get; set; }
-    public IEnumerable<Pizza> Pizzas { get; init; } = new List<Pizza>();
+    public Pizza[] Pizzas { get; init; } = [];
     public Address Address { get; init; } = new();
 }
 

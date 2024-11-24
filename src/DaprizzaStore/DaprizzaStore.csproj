@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DaprizzaModels\DaprizzaModels.csproj" />
+    <ProjectReference Include="..\DaprizzaShared\DaprizzaShared.csproj" />
   </ItemGroup>
 
 </Project>

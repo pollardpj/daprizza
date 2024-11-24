@@ -3,6 +3,7 @@ using Dapr.Actors.Client;
 using Dapr.Actors.Runtime;
 using DaprizzaInterfaces;
 using DaprizzaModels;
+using DaprizzaShared;
 
 namespace DaprizzaKitchen.Actors;
 

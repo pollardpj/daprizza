@@ -14,8 +14,6 @@ public class OrderValidator : AbstractValidator<Order>
             .NotNull();
         RuleFor(r => r.Address)
             .SetValidator(new AddressValidator());
-        RuleFor(r => r.SomeValue)
-            .NotEmpty();
     }
 }
 

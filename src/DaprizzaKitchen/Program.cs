@@ -5,6 +5,7 @@ using DaprizzaKitchen;
 using DaprizzaKitchen.Actors;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
+using DaprizzaShared;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);

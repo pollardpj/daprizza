@@ -4,32 +4,64 @@
 
 <EditForm Model="Model" FormName="NewOrder" OnValidSubmit="OnValidSubmit">
     <FluentValidationValidator DisableAssemblyScanning="true" />
-    <ValidationSummary />
-    <div class="form-group">
-        <label>Some Value: </label>
-        <InputText @bind-Value="Model.SomeValue" />
-        <ValidationMessage For="@(() => Model.SomeValue)"></ValidationMessage>
+    
+    <div class="row">
+        <div class="col-lg-6 col-xl-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Postal/ZIP Code</label>
+                        <InputText class="form-control" @bind-Value="Model.Address.Postcode" />
+                        <ValidationMessage For="@(() => Model.Address.Postcode)"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">House Number/Name</label>
+                        <InputText class="form-control" @bind-Value="Model.Address.HouseNumberOrName" />
+                        <ValidationMessage For="@(() => Model.Address.HouseNumberOrName)" />
+                    </div>
+                    <div class="mb-3">
+                        @foreach (var pizza in Model.Pizzas)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Pizza Size</label>
+                                        <InputSelect class="form-control" @bind-Value="@pizza.Size">
+                                            <option value="@PizzaSize.Small">Small</option>
+                                            <option value="@PizzaSize.Medium">Medium</option>
+                                            <option value="@PizzaSize.Large">Large</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => pizza.Size)" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Toppings</label>
+                                        <InputSelect class="form-control" @bind-Value="@pizza.Toppings">
+                                            <option value="cheese">Cheese</option>
+                                            <option value="tomato">Tomato</option>
+                                            <option value="peperoni">Peperoni</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => pizza.Toppings)" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div>
+                            <button type="submit" class="btn btn-primary">Submit New Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-        <label>Postal/ZIP Code: </label>
-        <InputText @bind-Value="Model.Address.Postcode" />
-    </div>
-    <div class="form-group">
-        <label>House Number or Name: </label>
-        <InputText @bind-Value="Model.Address.HouseNumberOrName" />
-    </div>
-    <div class="mt-3">
-        <button type="submit">Submit New Order</button>
-    </div>
+
 </EditForm>
 
 @code {
-    [SupplyParameterFromForm]
     public Order Model { get; set; }
 
     protected override Task OnInitializedAsync()
     {
-        Model = new Order();
+        Model = new Order { Pizzas = [new Pizza()] };
 
         return base.OnInitializedAsync();
     }
