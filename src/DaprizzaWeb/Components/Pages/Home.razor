@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Dapr.Client
+@using Req = DaprizzaModels
 
 <PageTitle>Home</PageTitle>
 
@@ -6,7 +8,7 @@
     <FluentValidationValidator DisableAssemblyScanning="true" />
     
     <div class="row">
-        <div class="col-lg-6 col-xl-4">
+        <div class="col-lg-6 col-xl-4 mb-3 mb-lg-0">
             <div class="card">
                 <div class="card-body">
                     <div class="mb-3">
@@ -19,38 +21,65 @@
                         <InputText class="form-control" @bind-Value="Model.Address.HouseNumberOrName" />
                         <ValidationMessage For="@(() => Model.Address.HouseNumberOrName)" />
                     </div>
-                    <div class="mb-3">
-                        @foreach (var pizza in Model.Pizzas)
-                        {
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Pizza Size</label>
-                                        <InputSelect class="form-control" @bind-Value="@pizza.Size">
-                                            <option value="@PizzaSize.Small">Small</option>
-                                            <option value="@PizzaSize.Medium">Medium</option>
-                                            <option value="@PizzaSize.Large">Large</option>
-                                        </InputSelect>
-                                        <ValidationMessage For="@(() => pizza.Size)" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Toppings</label>
-                                        <InputSelect class="form-control" @bind-Value="@pizza.Toppings">
-                                            <option value="cheese">Cheese</option>
-                                            <option value="tomato">Tomato</option>
-                                            <option value="peperoni">Peperoni</option>
-                                        </InputSelect>
-                                        <ValidationMessage For="@(() => pizza.Toppings)" />
-                                    </div>
+                    @{
+                        var i = 1;
+                    }
+                    @foreach (var pizza in Model.Pizzas)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                Pizza #@i
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Pizza Size</label>
+                                    <InputSelect class="form-control" @bind-Value="@pizza.Size">
+                                        <option value="@PizzaSize.Small">Small</option>
+                                        <option value="@PizzaSize.Medium">Medium</option>
+                                        <option value="@PizzaSize.Large">Large</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => pizza.Size)"/>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label">Toppings</label>
+                                    <InputSelect class="form-control" @bind-Value="@pizza.Toppings">
+                                        <option value="cheese">Cheese</option>
+                                        <option value="tomato">Tomato</option>
+                                        <option value="peperoni">Peperoni</option>
+                                        <option value="chicken">Chicken</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => pizza.Toppings)"/>
                                 </div>
                             </div>
-                        }
-                        <div>
-                            <button type="submit" class="btn btn-primary">Submit New Order</button>
                         </div>
+                        i++;
+                    }
+                    <div class="mb-3">
+                        <button @onclick="OnAddPizza" class="btn btn-secondary">Add Another Pizza</button>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit New Order</button>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="col-lg-6 col-xl-8">
+            @if (Messages.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        Messages
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            @foreach (var message in Messages)
+                            {
+                                <li class="list-group-item">@message</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
@@ -58,6 +87,7 @@
 
 @code {
     public Order Model { get; set; }
+    public List<string> Messages { get; set; } = [];
 
     protected override Task OnInitializedAsync()
     {
@@ -66,8 +96,40 @@
         return base.OnInitializedAsync();
     }
 
+    private void OnAddPizza()
+    {
+        Model.Pizzas = Model.Pizzas.Append(new Pizza()).ToArray();
+    }
+
     private async Task OnValidSubmit()
     {
+        try
+        {
+            var order = new Req.OrderRequest
+            {
+                Pizzas = Model.Pizzas.Select(p => new Req.Pizza
+                {
+                    Size = p.Size,
+                    Toppings = p.Toppings
+                }),
+                Address = new Req.Address
+                {
+                    HouseNumberOrName = Model.Address.HouseNumberOrName,
+                    Postcode = Model.Address.Postcode
+                }
+            };
 
+            var client = DaprClient.CreateInvokeHttpClient(appId: "daprizza-store");
+            var response = await client.PostAsJsonAsync("/api/order", order);
+            response.EnsureSuccessStatusCode();
+
+            Messages.Add($"Your order has been placed: {await response.Content.ReadAsStringAsync()}");
+
+            Model = new Order { Pizzas = [new Pizza()] };
+        }
+        catch (Exception ex)
+        {
+            Messages.Add(ex.Message);
+        }
     }
 }

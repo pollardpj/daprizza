@@ -2,7 +2,7 @@
 
 public class Order
 {
-    public Pizza[] Pizzas { get; init; } = [];
+    public Pizza[] Pizzas { get; set; } = [];
     public Address Address { get; init; } = new();
 }
 
