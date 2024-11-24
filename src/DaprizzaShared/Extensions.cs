@@ -21,5 +21,10 @@ public static class Extensions
 
         return JsonSerializer.Serialize(value, _options);
     }
+
+    public static TData Deserialize<TData>(this string value)
+    {
+        return JsonSerializer.Deserialize<TData>(value, _options);
+    }
 }
 

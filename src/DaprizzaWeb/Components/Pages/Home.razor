@@ -1,6 +1,6 @@
 ﻿@page "/"
 @using Dapr.Client
-@using Req = DaprizzaModels
+@using Mdl = DaprizzaModels
 
 <PageTitle>Home</PageTitle>
 
@@ -88,6 +88,7 @@
 @code {
     public Order Model { get; set; }
     public List<string> Messages { get; set; } = [];
+    public List<Guid> OrdersCreated { get; set; } = [];
 
     protected override Task OnInitializedAsync()
     {
@@ -105,14 +106,14 @@
     {
         try
         {
-            var order = new Req.OrderRequest
+            var order = new Mdl.OrderRequest
             {
-                Pizzas = Model.Pizzas.Select(p => new Req.Pizza
+                Pizzas = Model.Pizzas.Select(p => new Mdl.Pizza
                 {
                     Size = p.Size,
                     Toppings = p.Toppings
                 }),
-                Address = new Req.Address
+                Address = new Mdl.Address
                 {
                     HouseNumberOrName = Model.Address.HouseNumberOrName,
                     Postcode = Model.Address.Postcode
@@ -123,7 +124,11 @@
             var response = await client.PostAsJsonAsync("/api/order", order);
             response.EnsureSuccessStatusCode();
 
-            Messages.Add($"Your order has been placed: {await response.Content.ReadAsStringAsync()}");
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var orderResponse = responseContent.Deserialize<Mdl.OrderResponse>();
+
+            OrdersCreated.Add(orderResponse.OrderId);
+            Messages.Add($"Your order has been placed: {responseContent}");
 
             Model = new Order { Pizzas = [new Pizza()] };
         }
