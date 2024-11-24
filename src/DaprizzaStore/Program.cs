@@ -3,7 +3,7 @@ using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
-using DaprizzaStore.Framework;
+using DaprizzaStore.Extensions;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,6 +89,12 @@ app.MapPost("/orderstatus", [Topic(daprPubSubName, "orderstatus")] async (
 
     await client.SaveStateAsync(daprStoreName, order.Id.ToString(), order, 
         cancellationToken: token);
+
+    if (orderStatusUpdate.Status == OrderStatus.ReadyForDelivery)
+    {
+        var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-delivery");
+        await invokeClient.PostAsJsonAsync("/deliver", order, token);
+    }
 
     logger.LogInformation("Order Updated: {OrderUpdated}", JsonSerializer.Serialize(orderStatusUpdate));
 });

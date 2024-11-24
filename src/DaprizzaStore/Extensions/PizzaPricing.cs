@@ -1,6 +1,6 @@
 ﻿using DaprizzaModels;
 
-namespace DaprizzaStore.Framework;
+namespace DaprizzaStore.Extensions;
 
 public static class PizzaPricing
 {
