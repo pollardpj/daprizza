@@ -58,7 +58,7 @@ public class DriverActor(
         logger.LogInformation("I ({DriverActor}), am looking for pizzas to deliver...", Id.ToString());
 
         var managerActorId = new ActorId(Constants.DeliveryManagerActorId);
-        var proxy = ActorProxy.Create<IKitchenManagerActor>(managerActorId, nameof(DeliveryManagerActor));
+        var proxy = ActorProxy.Create<IDeliveryManagerActor>(managerActorId, nameof(DeliveryManagerActor));
 
         var order = await proxy.DequeueOrder();
 
