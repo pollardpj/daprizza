@@ -6,7 +6,6 @@ using DaprizzaKitchen.Actors;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
 using FluentValidation;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +16,11 @@ builder.Services.AddActors(options =>
     // Register actor types and configure actor settings
     options.Actors.RegisterActor<KitchenManagerActor>();
     options.Actors.RegisterActor<ChefActor>();
+
+    options.ReentrancyConfig = new ActorReentrancyConfig
+    {
+        Enabled = false
+    };
 });
 
 // Add services to the container.
@@ -38,7 +42,7 @@ app.MapPost("/cook", async (
 
     await proxy.EnqueueOrder(order);
 
-    logger.LogInformation("New Order accepted into the kitchen: {Order}", JsonSerializer.Serialize(order));
+    logger.LogInformation("New Order accepted into the kitchen: {Order}", order.Serialize());
 
     return Results.Accepted();
 });
@@ -60,7 +64,7 @@ app.MapMethods("/api/chefs/register", ["POST", "PUT"], async (
 
     await proxy.RegisterChefs(request.Chefs);
 
-    logger.LogInformation("Chefs registered and started work: {Chefs}", JsonSerializer.Serialize(request.Chefs));
+    logger.LogInformation("Chefs registered and started work: {Chefs}", request.Chefs.Serialize());
 
     return Results.Ok();
 });

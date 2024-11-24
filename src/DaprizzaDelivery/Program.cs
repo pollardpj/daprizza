@@ -1,12 +1,11 @@
-using DaprizzaDelivery.Actors;
-using DaprizzaModels.Validators;
-using DaprizzaModels;
-using FluentValidation;
-using Dapr.Actors.Client;
 using Dapr.Actors;
-using DaprizzaInterfaces;
-using System.Text.Json;
+using Dapr.Actors.Client;
 using DaprizzaDelivery;
+using DaprizzaDelivery.Actors;
+using DaprizzaInterfaces;
+using DaprizzaModels;
+using DaprizzaModels.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +16,11 @@ builder.Services.AddActors(options =>
     // Register actor types and configure actor settings
     options.Actors.RegisterActor<DeliveryManagerActor>();
     options.Actors.RegisterActor<DriverActor>();
+
+    options.ReentrancyConfig = new ActorReentrancyConfig
+    {
+        Enabled = false
+    };
 });
 
 // Add services to the container.
@@ -38,7 +42,7 @@ app.MapPost("/deliver", async (
 
     await proxy.EnqueueOrder(order);
 
-    logger.LogInformation("New Order dispatched to be delivered: {Order}", JsonSerializer.Serialize(order));
+    logger.LogInformation("New Order dispatched to be delivered: {Order}", order.Serialize());
 
     return Results.Accepted();
 });
@@ -60,7 +64,7 @@ app.MapMethods("/api/drivers/register", ["POST", "PUT"], async (
 
     await proxy.RegisterDrivers(request.Drivers);
 
-    logger.LogInformation("Drivers registered and started work: {Drivers}", JsonSerializer.Serialize(request.Drivers));
+    logger.LogInformation("Drivers registered and started work: {Drivers}", request.Drivers.Serialize());
 
     return Results.Ok();
 });

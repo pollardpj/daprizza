@@ -4,7 +4,6 @@ using Dapr.Actors.Runtime;
 using Dapr.Client;
 using DaprizzaInterfaces;
 using DaprizzaModels;
-using System.Text.Json;
 
 namespace DaprizzaDelivery.Actors;
 
@@ -31,7 +30,7 @@ public class DriverActor(
         if (current.HasValue)
         {
             logger.LogInformation("I ({DriverActor}), am delivering {Order}", 
-                Id.ToString(), JsonSerializer.Serialize(current.Value));
+                Id.ToString(), current.Value.Serialize());
 
             if (new Random().Next(1, 10) > 5)
             {
@@ -49,7 +48,7 @@ public class DriverActor(
                 await StateManager.TryRemoveStateAsync(deliverOrder);
 
                 logger.LogInformation("I ({DriverActor}), have delivered {Order}",
-                    Id.ToString(), JsonSerializer.Serialize(current.Value));
+                    Id.ToString(), current.Value.Serialize());
             }
 
             return;
@@ -67,7 +66,7 @@ public class DriverActor(
             await StateManager.SetStateAsync(deliverOrder, order);
 
             logger.LogInformation("I ({DriverActor}), have started delivering {Order}", 
-                Id.ToString(), JsonSerializer.Serialize(order));
+                Id.ToString(), order.Serialize());
 
             var orderStatusUpdate = new OrderStatusUpdate
             {

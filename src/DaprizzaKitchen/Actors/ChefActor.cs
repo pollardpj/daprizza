@@ -1,10 +1,9 @@
-﻿using System.Text.Json;
+﻿using Dapr.Actors;
 using Dapr.Actors.Client;
-using Dapr.Actors;
 using Dapr.Actors.Runtime;
+using Dapr.Client;
 using DaprizzaInterfaces;
 using DaprizzaModels;
-using Dapr.Client;
 
 namespace DaprizzaKitchen.Actors;
 
@@ -30,8 +29,7 @@ public class ChefActor(
 
         if (current.HasValue)
         {
-            logger.LogInformation("I ({ChefActor}), am cooking {Order}", 
-                Id.ToString(), JsonSerializer.Serialize(current.Value));
+            logger.LogInformation("I ({ChefActor}), am cooking {Order}", Id.ToString(), current.Value.Serialize());
 
             if (new Random().Next(1, 10) > 5)
             {
@@ -48,8 +46,7 @@ public class ChefActor(
 
                 await StateManager.TryRemoveStateAsync(cookingOrder);
 
-                logger.LogInformation("I ({ChefActor}), have an order ready to deliver: {Order}",
-                    Id.ToString(), JsonSerializer.Serialize(current.Value));
+                logger.LogInformation("I ({ChefActor}), have an order ready to deliver: {Order}", Id.ToString(), current.Value.Serialize());
             }
 
             return;
@@ -66,8 +63,7 @@ public class ChefActor(
         {
             await StateManager.SetStateAsync(cookingOrder, order);
 
-            logger.LogInformation("I ({ChefActor}), have started cooking {Order}", 
-                Id.ToString(), JsonSerializer.Serialize(order));
+            logger.LogInformation("I ({ChefActor}), have started cooking {Order}", Id.ToString(), order.Serialize());
 
             var orderStatusUpdate = new OrderStatusUpdate
             {

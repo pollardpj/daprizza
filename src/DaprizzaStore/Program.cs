@@ -1,10 +1,11 @@
-using System.Text.Json;
 using Dapr;
 using Dapr.Client;
 using DaprizzaModels;
 using DaprizzaModels.Validators;
-using DaprizzaStore.Extensions;
+using DaprizzaStore;
 using FluentValidation;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +53,8 @@ app.MapPost("/api/order", async (
         cancellationToken: token);
 
     var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-kitchen");
-    await invokeClient.PostAsJsonAsync("/cook", order, token);
+    var invokeResponse = await invokeClient.PostAsJsonAsync("/cook", order, token);
+    invokeResponse.EnsureSuccessStatusCode();
 
     return Results.Ok(new OrderResponse
     {
@@ -93,10 +95,11 @@ app.MapPost("/orderstatus", [Topic(daprPubSubName, "orderstatus")] async (
     if (orderStatusUpdate.Status == OrderStatus.ReadyForDelivery)
     {
         var invokeClient = DaprClient.CreateInvokeHttpClient(appId: "daprizza-delivery");
-        await invokeClient.PostAsJsonAsync("/deliver", order, token);
+        var invokeResponse = await invokeClient.PostAsJsonAsync("/deliver", order, token);
+        invokeResponse.EnsureSuccessStatusCode();
     }
 
-    logger.LogInformation("Order Updated: {OrderUpdated}", JsonSerializer.Serialize(orderStatusUpdate));
+    logger.LogInformation("Order Updated: {OrderUpdated}", orderStatusUpdate.Serialize());
 });
 
 app.Run();

@@ -41,13 +41,17 @@ public class DeliveryManagerActor(
     {
         var ordersTest = await StateManager.TryGetStateAsync<List<Order>>(ordersInQueue);
 
-        var orders = ordersTest.HasValue ? [] : new List<Order>();
+        var orders = ordersTest.HasValue ? ordersTest.Value : [];
+
+        logger.LogInformation("EnqueueOrder: Orders On Queue BEFORE: {Orders}", orders.Select(o => o.Id).Serialize());
 
         orders.Add(order);
 
         await StateManager.SetStateAsync(ordersInQueue, orders);
 
-        logger.LogInformation("Order received: {Order}", order);
+        logger.LogInformation("EnqueueOrder: Orders On Queue AFTER: {Orders}", orders.Select(o => o.Id).Serialize());
+
+        logger.LogInformation("Order received: {Order}", order.Serialize());
     }
 
     public async Task<Order> DequeueOrder()
@@ -58,10 +62,16 @@ public class DeliveryManagerActor(
         if (ordersTest.HasValue && ordersTest.Value.Any())
         {
             var orders = ordersTest.Value;
+
+            logger.LogInformation("DequeueOrder: Orders On Queue BEFORE: {Orders}", orders.Select(o => o.Id).Serialize());
+
             dequeuedOrder = orders[0];
             orders.RemoveAt(0);
             await StateManager.SetStateAsync(ordersInQueue, orders);
-            logger.LogInformation("Order dequeued: {Order}", dequeuedOrder);
+
+            logger.LogInformation("DequeueOrder: Orders On Queue AFTER: {Orders}", orders.Select(o => o.Id).Serialize());
+
+            logger.LogInformation("Order dequeued: {Order}", dequeuedOrder.Serialize());
         }
 
         return dequeuedOrder;
