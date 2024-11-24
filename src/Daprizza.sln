@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprizzaKitchen", "Daprizza
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprizzaDelivery", "DaprizzaDelivery\DaprizzaDelivery.csproj", "{7633D67D-3221-471F-97F4-66B8FD008E16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprizzaModels", "DaprizzaModels\DaprizzaModels.csproj", "{70F0BB20-4B05-4420-9648-C6853942E29A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprizzaModels", "DaprizzaModels\DaprizzaModels.csproj", "{70F0BB20-4B05-4420-9648-C6853942E29A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprizzaInterfaces", "DaprizzaInterfaces\DaprizzaInterfaces.csproj", "{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DaprizzaInterfaces", "DaprizzaInterfaces\DaprizzaInterfaces.csproj", "{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DaprizzaWeb", "DaprizzaWeb\DaprizzaWeb.csproj", "{64CB770A-86C4-4249-9F13-D63F94D63E3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,14 +37,18 @@ Global
 		{70F0BB20-4B05-4420-9648-C6853942E29A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70F0BB20-4B05-4420-9648-C6853942E29A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70F0BB20-4B05-4420-9648-C6853942E29A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Debug|Any CPU.ActiveCfg = Debug
-		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Debug|Any CPU.Build.0 = Debug
-		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Release|Any CPU.ActiveCfg = Release
-		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Release|Any CPU.Build.0 = Release
 		{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DF9AFDB-D4B7-4753-9D33-24D4AF1F57F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Debug|Any CPU.ActiveCfg = Debug
+		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Debug|Any CPU.Build.0 = Debug
+		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Release|Any CPU.ActiveCfg = Release
+		{D1786E2B-CAA0-4B2D-A974-9845EB9E420F}.Release|Any CPU.Build.0 = Release
+		{64CB770A-86C4-4249-9F13-D63F94D63E3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64CB770A-86C4-4249-9F13-D63F94D63E3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64CB770A-86C4-4249-9F13-D63F94D63E3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64CB770A-86C4-4249-9F13-D63F94D63E3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

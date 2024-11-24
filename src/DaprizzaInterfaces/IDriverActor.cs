@@ -1,9 +1,10 @@
 ﻿using Dapr.Actors;
+using DaprizzaModels;
 
 namespace DaprizzaInterfaces;
 
 public interface IDriverActor : IActor
 {
-    Task StartDelivering();
+    Task StartDelivering(Driver driver);
 }
 

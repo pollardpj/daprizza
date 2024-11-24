@@ -21,10 +21,10 @@ public class DeliveryManagerActor(
         // Get all the drivers working:
         foreach (var driver in drivers)
         {
-            var actorId = new ActorId($"{driverActorIdPrefix}-{driver.Name!.ToLowerInvariant()}");
+            var actorId = new ActorId($"{driverActorIdPrefix}-{driver.Name.ToLowerInvariant()}");
             var proxy = ActorProxy.Create<IDriverActor>(actorId, nameof(DriverActor));
 
-            await proxy.StartDelivering();
+            await proxy.StartDelivering(driver);
         }
 
         await this.RegisterReminderAsync("CheckOnDrivers", null, TimeSpan.FromSeconds(15), TimeSpan.FromSeconds(15));

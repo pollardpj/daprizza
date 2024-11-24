@@ -5,6 +5,7 @@ public class OrderStatusUpdate
     public Guid OrderId { get; init; }
     public DateTime UpdatedTimestampUtc { get; init; }
     public OrderStatus Status { get; init; }
+    public string UpdatedByActorName { get; set; }
     public IEnumerable<string> Errors { get; init; }
 }
 

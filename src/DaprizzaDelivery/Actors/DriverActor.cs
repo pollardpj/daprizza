@@ -11,10 +11,13 @@ public class DriverActor(
     ActorHost host,
     ILogger<DriverActor> logger) : Actor(host), IDriverActor, IRemindable
 {
-    private const string deliverOrder = "deliverOrder";
+    private const string deliveringOrder = "deliveringOrder";
+    private const string driverStateName = "driver";
 
-    public async Task StartDelivering()
+    public async Task StartDelivering(Driver driver)
     {
+        await StateManager.SetStateAsync(driverStateName, driver);
+
         await RegisterReminderAsync("CheckInWithDeliveryManager", null, TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(13));
     }
 
@@ -25,7 +28,7 @@ public class DriverActor(
             return;
         }
 
-        var current = await StateManager.TryGetStateAsync<Order>(deliverOrder);
+        var current = await StateManager.TryGetStateAsync<Order>(deliveringOrder);
 
         if (current.HasValue)
         {
@@ -34,18 +37,21 @@ public class DriverActor(
 
             if (new Random().Next(1, 10) > 5)
             {
+                var driver = await StateManager.TryGetStateAsync<Driver>(driverStateName);
+
                 var orderStatusUpdate = new OrderStatusUpdate
                 {
                     OrderId = current.Value.Id,
                     Status = OrderStatus.Delivered,
-                    UpdatedTimestampUtc = DateTime.UtcNow
+                    UpdatedTimestampUtc = DateTime.UtcNow,
+                    UpdatedByActorName = driver.HasValue ? driver.Value.Name : null
                 };
 
                 using var client = new DaprClientBuilder().Build();
 
                 await client.PublishEventAsync(Constants.DaprOrderStatePubSubName, "orderstatus", orderStatusUpdate);
 
-                await StateManager.TryRemoveStateAsync(deliverOrder);
+                await StateManager.TryRemoveStateAsync(deliveringOrder);
 
                 logger.LogInformation("I ({DriverActor}), have delivered {Order}",
                     Id.ToString(), current.Value.Serialize());
@@ -63,16 +69,19 @@ public class DriverActor(
 
         if (order != null)
         {
-            await StateManager.SetStateAsync(deliverOrder, order);
+            await StateManager.SetStateAsync(deliveringOrder, order);
 
             logger.LogInformation("I ({DriverActor}), have started delivering {Order}", 
                 Id.ToString(), order.Serialize());
+
+            var driver = await StateManager.TryGetStateAsync<Driver>(driverStateName);
 
             var orderStatusUpdate = new OrderStatusUpdate
             {
                 OrderId = order.Id,
                 Status = OrderStatus.InTransit,
-                UpdatedTimestampUtc = DateTime.UtcNow
+                UpdatedTimestampUtc = DateTime.UtcNow,
+                UpdatedByActorName = driver.HasValue ? driver.Value.Name : null
             };
 
             using var client = new DaprClientBuilder().Build();
