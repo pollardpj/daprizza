@@ -1,5 +1,4 @@
-﻿using DaprizzaModels;
-using DaprizzaShared;
+﻿using DaprizzaShared;
 
 namespace DaprizzaWeb.Models;
 

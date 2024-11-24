@@ -1,12 +1,16 @@
 ﻿@page "/"
 @using Dapr.Client
+@using DaprizzaWeb.Hubs
 @using Mdl = DaprizzaModels
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<EditForm Model="Model" FormName="NewOrder" OnValidSubmit="OnValidSubmit">
+<EditForm EditContext="EditContext" FormName="NewOrder" OnSubmit="OnSubmit">
     <FluentValidationValidator DisableAssemblyScanning="true" />
-    
+    <ValidationSummary/>
     <div class="row">
         <div class="col-lg-6 col-xl-4 mb-3 mb-lg-0">
             <div class="card">
@@ -86,15 +90,48 @@
 </EditForm>
 
 @code {
-    public Order Model { get; set; }
-    public List<string> Messages { get; set; } = [];
-    public List<Guid> OrdersCreated { get; set; } = [];
+    private Order Model { get; set; }
+    private EditContext EditContext { get; set; }
+    private List<string> Messages { get; } = [];
+    private List<Guid> OrdersCreated { get; } = [];
 
-    protected override Task OnInitializedAsync()
+    private string HubUrl { get; set; }
+    private HubConnection HubConnection { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
         Model = new Order { Pizzas = [new Pizza()] };
+        EditContext = new EditContext(Model);
 
-        return base.OnInitializedAsync();
+        try
+        {
+            var baseUrl = NavigationManager.BaseUri;
+
+            HubUrl = baseUrl.TrimEnd('/') + PizzaHub.HubUrl;
+
+            HubConnection = new HubConnectionBuilder()
+                .WithUrl(HubUrl)
+                .Build();
+
+            HubConnection.On<Mdl.OrderStatusUpdate>("OnOrderStatusUpdate", OnOrderStatusUpdate);
+
+            await HubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnOrderStatusUpdate(Mdl.OrderStatusUpdate orderStatusUpdate)
+    {
+        if (OrdersCreated.Contains(orderStatusUpdate.OrderId))
+        {
+            Messages.Add($"Order updated: {orderStatusUpdate.Serialize()}");
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private void OnAddPizza()
@@ -102,8 +139,13 @@
         Model.Pizzas = Model.Pizzas.Append(new Pizza()).ToArray();
     }
 
-    private async Task OnValidSubmit()
+    private async Task OnSubmit()
     {
+        if (!EditContext.Validate())
+        {
+            return;
+        }
+
         try
         {
             var order = new Mdl.OrderRequest
@@ -131,6 +173,7 @@
             Messages.Add($"Your order has been placed: {responseContent}");
 
             Model = new Order { Pizzas = [new Pizza()] };
+            EditContext = new EditContext(Model);
         }
         catch (Exception ex)
         {
