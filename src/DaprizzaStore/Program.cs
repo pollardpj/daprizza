@@ -4,8 +4,6 @@ using DaprizzaModels;
 using DaprizzaModels.Validators;
 using DaprizzaStore;
 using FluentValidation;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

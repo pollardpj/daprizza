@@ -34,8 +34,7 @@ app.UseCloudEvents();
 
 app.MapPost("/cook", async (
     ILogger<Program> logger, 
-    Order order, 
-    CancellationToken token) =>
+    Order order) =>
 {
     var actorId = new ActorId(Constants.KitchenManagerActorId);
     var proxy = ActorProxy.Create<IKitchenManagerActor>(actorId, nameof(KitchenManagerActor));
